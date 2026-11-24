@@ -63,7 +63,7 @@ One event shape serves both planes. Fields that do not apply are omitted.
 | --- | --- |
 | Identity | `schema_version`, `id`, `ts`, `run_id`, `session_id` |
 | Origin | `harness`, `harness_version`, `source` (`adapter`, `proxy`, `gap`, `system`), `native_hook`, `native_tool` |
-| Action | `action`, `stage` (`intent`, `result`), `mapped` |
+| Action | `action`, `stage` (`intent`, `result`) |
 | Tool detail | `target`, `command`, `cwd`, `mcp_server`, `mcp_tool`, `exit_code` |
 | Network detail | `method`, `host`, `url`, `status`, `bytes_out`, `bytes_in` |
 | Decision | `decision` (`observe`, `allow`, `deny`), `rule_id` |
@@ -73,7 +73,10 @@ One event shape serves both planes. Fields that do not apply are omitted.
 Actions: `session_start`, `session_end`, `prompt`, `response`, `file_read`,
 `file_write`, `file_delete`, `command_exec`, `mcp_call`, `web_fetch`,
 `web_search`, `subagent_start`, `subagent_stop`, `tool_use`, `net_request`,
-`gap`.
+`gap`. `tool_use` is the explicit marker for a native tool that the adapter
+could not map with certainty.
+
+The Go definition in `internal/event` is the reference.
 
 `run_id` comes from `ZYPHR_RUN_ID`, which `zyphr run` sets for its child
 process tree. `session_id` is the harness's own session identity. Either can be

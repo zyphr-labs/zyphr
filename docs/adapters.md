@@ -88,8 +88,8 @@ A capability set states, for this harness:
 ## Decode rules
 
 - Map a native tool to a specific action only when the mapping is certain.
-- Any other tool becomes `tool_use` with `mapped: false`, and it keeps the
-  native tool name. Never guess a file or shell action.
+- Any other tool becomes `tool_use`, the explicit unmapped action, and it
+  keeps the native tool name. Never guess a file or shell action.
 - Keep the native hook name and native tool name on the event.
 - Send metadata, not content. No file bodies. No auth headers. Prompt and
   response text goes in the body fields only, and the collector drops it unless
@@ -129,7 +129,7 @@ that fails it does not ship. The suite checks at least:
 
 1. `Info` is complete, and capabilities are consistent with the fixtures.
 2. Every fixture in `testdata/` decodes to its expected normalized events.
-3. Unknown tools decode to `tool_use` with `mapped: false`.
+3. Unknown tools decode to `tool_use` with the native tool name.
 4. Malformed, empty, and oversized payloads do not panic and do not block.
 5. The permissive reply for every declared hook matches the recorded expected
    reply.
