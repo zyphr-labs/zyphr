@@ -1,0 +1,42 @@
+#!/bin/sh
+# Single verification entry point. Stops at the first failure.
+set -eu
+cd "$(dirname "$0")"
+
+step() { printf '\n== %s\n' "$1"; }
+
+step "gofmt"
+unformatted=$(gofmt -l . 2>/dev/null | grep -v '^worktrees/' || true)
+if [ -n "$unformatted" ]; then
+	echo "gofmt needed for:"
+	echo "$unformatted"
+	exit 1
+fi
+
+step "core must not import harness packages"
+# Only the registry in internal/harness may import internal/harness/<name>.
+violations=$(grep -rn --include='*.go' '"github.com/zyphr-labs/zyphr/internal/harness/' . 2>/dev/null \
+	| grep -v '^./worktrees/' \
+	| grep -v '^./internal/harness/' || true)
+if [ -n "$violations" ]; then
+	echo "harness package imported outside internal/harness:"
+	echo "$violations"
+	exit 1
+fi
+
+step "no em dashes"
+if grep -rIn --exclude-dir=.git --exclude-dir=worktrees --exclude-dir=bin --exclude-dir=dist --exclude-dir=testdata "$(printf '\342\200\224')" . ; then
+	echo "em dash found"
+	exit 1
+fi
+
+step "go vet"
+go vet ./...
+
+step "go build (CGO off)"
+CGO_ENABLED=0 go build -trimpath -o bin/zyphr ./cmd/zyphr
+
+step "go test -race"
+go test -race -count=1 ./...
+
+printf '\nverify: ok\n'
